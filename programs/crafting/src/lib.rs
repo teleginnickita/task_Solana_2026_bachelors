@@ -1,6 +1,6 @@
 use anchor_lang::prelude::*;
 
-declare_id!("Craft1111111111111111111111111111111111111");
+declare_id!("GqTny3DGUaCXESufnpUQXG1p8QFodc1aCrYG1qvPkqXd");
 
 #[program]
 pub mod crafting {
@@ -14,4 +14,3 @@ pub mod crafting {
 
 #[derive(Accounts)]
 pub struct Initialize {}
-

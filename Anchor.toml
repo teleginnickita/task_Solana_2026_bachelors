@@ -1,14 +1,17 @@
+[toolchain]
+anchor_version = "0.31.1"
+
 [features]
 resolution = true
 skip-lint = false
 
 [programs.localnet]
-resource_manager = "ResMng1111111111111111111111111111111111"
-item_nft = "ItemNFT111111111111111111111111111111111111"
-crafting = "Craft1111111111111111111111111111111111111"
-search = "Search111111111111111111111111111111111111"
-marketplace = "Market11111111111111111111111111111111111"
-magic_token = "Magic111111111111111111111111111111111111"
+resource_manager = "CcvkCG2poiGbhLzkodhefhJbMbBW9AxHdKPR3eHrxfvf"
+item_nft = "6wUan26ACFhc3DhFPWh3K3QGxhHMAubKAyUtqRfJz9ej"
+crafting = "GqTny3DGUaCXESufnpUQXG1p8QFodc1aCrYG1qvPkqXd"
+search = "3kx233sHmZfTrMHJ66sqBip2nAqntfL6y6V219BfmBdN"
+marketplace = "xCeFkpeadNjjYyL3BStmgDceC9ZjeRW3DtErAJ1nQ2y"
+magic_token = "2ug8zVrkg3zkpCqEuR4AR2KBEkhSLr49pbcScTLrDKTL"
 
 [registry]
 url = "https://api.apr.dev"
@@ -19,4 +22,3 @@ wallet = "~/.config/solana/id.json"
 
 [scripts]
 test = "yarn ts-mocha -p ./tsconfig.json -t 1000000 tests/**/*.ts"
-

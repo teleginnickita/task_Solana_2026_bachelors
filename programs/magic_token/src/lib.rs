@@ -1,6 +1,6 @@
 use anchor_lang::prelude::*;
 
-declare_id!("Magic111111111111111111111111111111111111");
+declare_id!("2ug8zVrkg3zkpCqEuR4AR2KBEkhSLr49pbcScTLrDKTL");
 
 #[program]
 pub mod magic_token {
@@ -14,4 +14,3 @@ pub mod magic_token {
 
 #[derive(Accounts)]
 pub struct Initialize {}
-
