@@ -1380,6 +1380,7 @@ dependencies = [
  "anchor-lang",
  "anchor-spl",
  "game_core",
+ "resource_manager",
 ]
 
 [[package]]

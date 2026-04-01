@@ -10,6 +10,9 @@ pub const RESOURCE_AUTHORITY_SEED: &[u8] = b"resource-authority";
 /// PDA seed for a player's search state account.
 pub const PLAYER_SEED: &[u8] = b"player";
 
+/// PDA seed for the signer authority used by the search program in CPI calls.
+pub const SEARCH_AUTHORITY_SEED: &[u8] = b"search-authority";
+
 /// PDA seed for per-item metadata accounts.
 pub const ITEM_METADATA_SEED: &[u8] = b"item-metadata";
 

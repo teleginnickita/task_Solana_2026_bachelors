@@ -20,3 +20,4 @@ default = []
 anchor-lang = { workspace = true }
 anchor-spl = { workspace = true }
 game_core = { path = "../../crates/game_core" }
+resource_manager = { path = "../resource_manager", features = ["cpi"] }

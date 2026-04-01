@@ -33,18 +33,35 @@ describe("resource_manager", () => {
     )[0],
   );
 
-  const magicTokenMint = anchor.web3.Keypair.generate().publicKey;
+  const magicTokenMint = anchor.workspace.MagicToken.programId;
   const itemPrices = [10, 25, 40, 80].map((value) => new anchor.BN(value));
+  const searchProgramId = anchor.workspace.Search.programId;
+  const craftingProgramId = anchor.workspace.Crafting.programId;
 
-  it("initializes game config", async () => {
+  async function ensureGameConfig(): Promise<void> {
+    const existing = await program.account.gameConfig.fetchNullable(gameConfigPda);
+    if (existing) {
+      return;
+    }
+
     await program.methods
-      .initializeGameConfig(resourceMintPdas, magicTokenMint, itemPrices)
+      .initializeGameConfig(
+        resourceMintPdas,
+        magicTokenMint,
+        itemPrices,
+        searchProgramId,
+        craftingProgramId,
+      )
       .accounts({
         admin: admin.publicKey,
         gameConfig: gameConfigPda,
         systemProgram: anchor.web3.SystemProgram.programId,
       })
       .rpc();
+  }
+
+  it("initializes game config", async () => {
+    await ensureGameConfig();
 
     const gameConfig = await program.account.gameConfig.fetch(gameConfigPda);
 
@@ -54,9 +71,13 @@ describe("resource_manager", () => {
       resourceMintPdas.map((key) => key.toBase58()),
     );
     expect(gameConfig.itemPrices.map((value: anchor.BN) => value.toNumber())).to.deep.eq([10, 25, 40, 80]);
+    expect(gameConfig.searchProgram.toBase58()).to.eq(searchProgramId.toBase58());
+    expect(gameConfig.craftingProgram.toBase58()).to.eq(craftingProgramId.toBase58());
   });
 
   it("initializes a token-2022 mint and mints a resource to the admin", async () => {
+    await ensureGameConfig();
+
     const resourceIndex = 0;
     const resourceMint = resourceMintPdas[resourceIndex];
     const [recipientTokenAccount] = anchor.web3.PublicKey.findProgramAddressSync(
@@ -68,17 +89,20 @@ describe("resource_manager", () => {
       ASSOCIATED_TOKEN_PROGRAM_ID,
     );
 
-    await program.methods
-      .initializeResourceMint(resourceIndex)
-      .accounts({
-        admin: admin.publicKey,
-        gameConfig: gameConfigPda,
-        mintAuthority: resourceAuthorityPda,
-        resourceMint,
-        tokenProgram: TOKEN_2022_PROGRAM_ID,
-        systemProgram: anchor.web3.SystemProgram.programId,
-      })
-      .rpc();
+    const existingMint = await provider.connection.getAccountInfo(resourceMint);
+    if (!existingMint) {
+      await program.methods
+        .initializeResourceMint(resourceIndex)
+        .accounts({
+          admin: admin.publicKey,
+          gameConfig: gameConfigPda,
+          mintAuthority: resourceAuthorityPda,
+          resourceMint,
+          tokenProgram: TOKEN_2022_PROGRAM_ID,
+          systemProgram: anchor.web3.SystemProgram.programId,
+        })
+        .rpc();
+    }
 
     const createAtaIx = new anchor.web3.TransactionInstruction({
       programId: ASSOCIATED_TOKEN_PROGRAM_ID,
@@ -93,10 +117,13 @@ describe("resource_manager", () => {
       data: Buffer.alloc(0),
     });
 
-    await provider.sendAndConfirm(
-      new anchor.web3.Transaction().add(createAtaIx),
-      [],
-    );
+    const ataInfo = await provider.connection.getAccountInfo(recipientTokenAccount);
+    if (!ataInfo) {
+      await provider.sendAndConfirm(
+        new anchor.web3.Transaction().add(createAtaIx),
+        [],
+      );
+    }
 
     await program.methods
       .mintResource(resourceIndex, new anchor.BN(3))
@@ -124,5 +151,37 @@ describe("resource_manager", () => {
     expect(mintData.parsed.info.decimals).to.eq(0);
     expect(mintData.parsed.info.mintAuthority).to.eq(resourceAuthorityPda.toBase58());
     expect(Number(tokenBalance.value.amount)).to.eq(3);
+  });
+
+  it("burns a portion of the admin resource balance", async () => {
+    await ensureGameConfig();
+
+    const resourceIndex = 0;
+    const resourceMint = resourceMintPdas[resourceIndex];
+    const [ownerTokenAccount] = anchor.web3.PublicKey.findProgramAddressSync(
+      [
+        admin.publicKey.toBuffer(),
+        TOKEN_2022_PROGRAM_ID.toBuffer(),
+        resourceMint.toBuffer(),
+      ],
+      ASSOCIATED_TOKEN_PROGRAM_ID,
+    );
+
+    await program.methods
+      .burnResource(resourceIndex, new anchor.BN(2))
+      .accounts({
+        owner: admin.publicKey,
+        gameConfig: gameConfigPda,
+        resourceMint,
+        ownerTokenAccount,
+        tokenProgram: TOKEN_2022_PROGRAM_ID,
+      })
+      .rpc();
+
+    const tokenBalance = await provider.connection.getTokenAccountBalance(
+      ownerTokenAccount,
+    );
+
+    expect(Number(tokenBalance.value.amount)).to.eq(1);
   });
 });
