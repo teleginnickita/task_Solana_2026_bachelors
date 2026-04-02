@@ -25,6 +25,22 @@ pub mod item_nft {
 
         Ok(())
     }
+
+    /// Updates protocol metadata ownership after an item transfer.
+    pub fn transfer_item_metadata(ctx: Context<TransferItemMetadata>) -> Result<()> {
+        let item_metadata = &mut ctx.accounts.item_metadata;
+        item_metadata.owner = ctx.accounts.new_owner.key();
+
+        Ok(())
+    }
+
+    /// Marks item metadata as burned after a successful marketplace sale.
+    pub fn burn_item_metadata(ctx: Context<BurnItemMetadata>) -> Result<()> {
+        let item_metadata = &mut ctx.accounts.item_metadata;
+        item_metadata.owner = Pubkey::default();
+
+        Ok(())
+    }
 }
 
 #[derive(Accounts)]
@@ -42,6 +58,38 @@ pub struct RegisterItemMetadata<'info> {
     )]
     pub item_metadata: Account<'info, ItemMetadata>,
     pub system_program: Program<'info, System>,
+}
+
+#[derive(Accounts)]
+pub struct TransferItemMetadata<'info> {
+    pub owner: Signer<'info>,
+    /// CHECK: The new owner can be any system account or wallet.
+    pub new_owner: UncheckedAccount<'info>,
+    #[account(
+        mut,
+        seeds = [ITEM_METADATA_SEED, mint.key().as_ref()],
+        bump = item_metadata.bump,
+        has_one = owner,
+        has_one = mint
+    )]
+    pub item_metadata: Account<'info, ItemMetadata>,
+    /// CHECK: The mint is tied to the PDA derivation above.
+    pub mint: UncheckedAccount<'info>,
+}
+
+#[derive(Accounts)]
+pub struct BurnItemMetadata<'info> {
+    pub owner: Signer<'info>,
+    #[account(
+        mut,
+        seeds = [ITEM_METADATA_SEED, mint.key().as_ref()],
+        bump = item_metadata.bump,
+        has_one = owner,
+        has_one = mint
+    )]
+    pub item_metadata: Account<'info, ItemMetadata>,
+    /// CHECK: The mint is tied to the PDA derivation above.
+    pub mint: UncheckedAccount<'info>,
 }
 
 #[error_code]

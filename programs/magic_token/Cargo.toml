@@ -19,3 +19,4 @@ default = []
 [dependencies]
 anchor-lang = { workspace = true }
 anchor-spl = { workspace = true }
+game_core = { path = "../../crates/game_core" }

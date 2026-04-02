@@ -19,3 +19,7 @@ default = []
 [dependencies]
 anchor-lang = { workspace = true }
 anchor-spl = { workspace = true }
+game_core = { path = "../../crates/game_core" }
+magic_token = { path = "../magic_token", features = ["cpi"] }
+item_nft = { path = "../item_nft", features = ["cpi"] }
+resource_manager = { path = "../resource_manager", features = ["cpi"] }

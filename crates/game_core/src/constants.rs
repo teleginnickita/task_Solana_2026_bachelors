@@ -13,6 +13,18 @@ pub const PLAYER_SEED: &[u8] = b"player";
 /// PDA seed for the signer authority used by the search program in CPI calls.
 pub const SEARCH_AUTHORITY_SEED: &[u8] = b"search-authority";
 
+/// PDA seed for the singleton magic token configuration account.
+pub const MAGIC_TOKEN_CONFIG_SEED: &[u8] = b"magic-token-config";
+
+/// PDA seed for the mint authority used by the magic token program.
+pub const MAGIC_TOKEN_AUTHORITY_SEED: &[u8] = b"magic-token-authority";
+
+/// PDA seed for the magic token mint account.
+pub const MAGIC_TOKEN_MINT_SEED: &[u8] = b"magic-token-mint";
+
+/// PDA seed for the signer authority used by marketplace CPI calls.
+pub const MARKETPLACE_AUTHORITY_SEED: &[u8] = b"marketplace-authority";
+
 /// PDA seed for per-item metadata accounts.
 pub const ITEM_METADATA_SEED: &[u8] = b"item-metadata";
 
